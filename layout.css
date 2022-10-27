@@ -1,0 +1,406 @@
+$(function () {
+  $("input[type='text']").blur(function (e) {
+    this.value = this.value.replace(/^\s+|\s+$/g, "");
+  });
+
+  $("input[type='email']").blur(function (e) {
+    this.value = this.value.replace(/^\s+|\s+$/g, "");
+  });
+
+
+
+
+});
+
+jQuery.fn.ForceNumericOnly = function () {
+  return this.each(function () {
+    $(this).keydown(function (e) {
+      var key = e.charCode || e.keyCode || 0;
+      // allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+      // home, end, period, and numpad decimal
+      return (
+        key == 8 ||
+        key == 9 ||
+        key == 13 ||
+        key == 46 ||
+        key == 110 ||
+        key == 190 ||
+        (key >= 35 && key <= 40) ||
+        (key >= 48 && key <= 57) ||
+        (key >= 96 && key <= 105)
+      );
+    });
+  });
+};
+
+// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
+
+// Write your JavaScript code.
+
+const ProgressBarRedemption = {
+  init(point = 0, points = [20, 40, 60, 100, 160]) {
+    const { percent, status } = this.calculator(point, points);
+    this.render(percent, status, point, points);
+  },
+  /**
+   *
+   * @param {number} percent
+   * @param {number} point
+   * @param {'OverPoint'|'StartPoint'|'Normal'} status
+   * @param {Array<number>} points
+   */
+  render(percent, status, point, points) {
+    /**
+     * @type {import('jquery')}
+     */
+    const $ = window.$ || window.jQuery;
+    const progressBar = $(".progress-bar.milestones");
+    progressBar.find(".progress-bar-icon").empty();
+    $.each(points, (i, val) => {
+      const condition = val <= point;
+      const circle = $("<span/>", {
+        class: `progress-bar-circle${condition ? " active" : ""}`,
+      });
+      const item = $("<div/>", {
+        class: `progress-bar-icon-item${condition ? " active" : ""}`,
+      });
+      item.append(circle);
+      progressBar.find(".progress-bar-icon").append(item);
+    });
+    let item;
+    switch (status) {
+      case "OverPoint":
+        item = progressBar.find(".progress-bar-icon-item").last();
+        break;
+      case "StartPoint":
+        item = progressBar.find(".progress-bar-icon-item").first();
+        break;
+      default:
+        item = progressBar.find(".progress-bar-icon-item.active").last().next();
+        break;
+    }
+    item.addClass("on-progress").css({
+      "--percent": `${percent}%`,
+    });
+  },
+  /**
+   *
+   * @param {number} point
+   * @param {Array<number>} points
+   * @returns
+   */
+  calculator(point, points = []) {
+    const indexNextPoint = points.findIndex((x) => x >= point);
+    let currentPoint = 0;
+    let nextPoint;
+    let percent = 0;
+    /**
+     * @type {'OverPoint'|'StartPoint'|'Normal'}
+     */
+    let status;
+    if (indexNextPoint !== -1) {
+      currentPoint = points[indexNextPoint - 1] || 0;
+      nextPoint = points[indexNextPoint];
+      percent = ((point - currentPoint) / (nextPoint - currentPoint)) * 100;
+      status = currentPoint === 0 ? "StartPoint" : "Normal";
+    } else {
+      currentPoint = points[points.length - 1];
+      percent = point;
+      status = "OverPoint";
+    }
+
+    return {
+      percent,
+      status,
+    };
+  },
+};
+
+function setCookie(cname, cvalue, exSecond, domain) {
+  var d = new Date();
+  d.setTime(d.getTime() + exSecond * 1000);
+  var expires = "expires=" + d.toGMTString();
+  document.cookie =
+    cname + "=" + cvalue + ";" + expires + `;domain=${domain};path=/`;
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(";");
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == " ") {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+// Mega Menu
+$(document).ready(function () {
+  // tooltips
+  $('[data-toggle="tooltip"]').tooltip();
+  // console.log($('[data-toggle="tooltip"]').length);
+
+  // datepicker
+  $("input.datepicker").each(function () {
+    $(this).datepicker({
+      autoclose: true,
+      endDate: "+0d",
+      format: "dd/mm/yyyy",
+    });
+  });
+  $(".form-row.timepicker").each(function () {
+    var $this = $(this);
+    function setTime() {
+      var hour = $this.find(".hour").val();
+      var min = $this.find(".minute").val();
+      var ap = $this.find(".ap").val();
+
+      var time = hour + ":" + min + " " + ap;
+      console.log(time);
+      $this.find("input").val(time);
+    }
+    $this.find("select").change(function () {
+      setTime();
+    });
+    setTime();
+  });
+
+  // mega menu
+  $("#megamenu .searcher form").on("submit", function (e) {
+    // console.log('mega menu search');
+    e.preventDefault();
+
+    var keyword = $(this).find("input").val();
+    window.location.href = window.location.origin + "?search=" + keyword;
+  });
+
+  $("#btn-megamenu").click(function () {
+    console.log("click");
+    $(this).hide();
+    $("#btn-close-megamenu").show();
+    $("#megamenu")
+      .css({
+        opacity: 0,
+      })
+      .show();
+    TweenMax.fromTo(
+      "#megamenu",
+      0.3,
+      {
+        opacity: 0,
+        y: -30,
+      },
+      {
+        opacity: 1,
+        y: 0,
+      }
+    );
+    $("body").css({
+      "overflow-y": "hidden",
+    });
+  });
+  $("#btn-close-megamenu").click(function () {
+    // console.log('click');
+    $(this).hide();
+    $("#btn-megamenu").show();
+    TweenMax.to("#megamenu", 0.2, {
+      opacity: 0,
+      onComplete: function () {
+        $("#megamenu")
+          .css({
+            opacity: 0,
+          })
+          .hide();
+      },
+    });
+    $("body").css({
+      "overflow-y": "auto",
+    });
+  });
+
+  var parentPath = window.location.pathname.split("/")[1];
+
+  if (parentPath == "") {
+    $("#mobile-nav .item-home").addClass("active");
+  } else if (parentPath == "History") {
+    $("#mobile-nav .item-history").addClass("active");
+  } else if (parentPath == "MyRewards") {
+    $("#mobile-nav .item-rewards").addClass("active");
+  } else if (parentPath == "Cards") {
+    $("#mobile-nav .item-cards").addClass("active");
+  }
+
+  var lastActive = 0;
+  $(".btn-more").click(function (e) {
+    e.preventDefault();
+    console.log("click");
+    if ($("#mobile-nav .active").index() != 4) {
+      lastActive = $("#mobile-nav .active").index();
+      console.log(lastActive);
+
+      $("#mobile-nav .active").removeClass("active");
+      $(this).addClass("active");
+      $("#megamenu")
+        .css({
+          opacity: 0,
+        })
+        .show();
+      TweenMax.fromTo(
+        "#megamenu",
+        0.3,
+        {
+          y: "-10%",
+        },
+        {
+          opacity: 1,
+          y: "0%",
+        }
+      );
+      $("body").css({
+        overflow: "hidden",
+      });
+    }
+  });
+
+  $(".btn-close-megamenu").click(function () {
+    $("#mobile-nav .active").removeClass("active");
+    console.log(lastActive);
+
+    if (lastActive != -1) {
+      $("#mobile-nav .menu-item").eq(lastActive).addClass("active");
+    }
+
+    TweenMax.to("#megamenu", 0.2, {
+      opacity: 0,
+      onComplete: function () {
+        $("#megamenu")
+          .css({
+            opacity: 0,
+          })
+          .hide();
+      },
+    });
+    $("body").css({
+      overflow: "auto",
+    });
+  });
+
+  // pop up modal
+  $('[rel^="popupmodal-"]').click(function (e) {
+    console.log("pop up modal");
+    $(".sbr_levels_tab_view").first().css({
+      "display": "block",
+    })
+
+    e.preventDefault();
+    var rel = $(this).attr("rel").split("--")[1];
+    var content = $("#" + rel);
+    var modal =
+      `
+            <div class="cpopup-modal" modal-rel="`+ rel + `">
+                <div class="cpopup-modal__window container">
+                    <div class="btn-close-modal">
+                        <span class="sb-icon-close"></span>
+                    </div>
+                    ` +
+      content.html() +
+      `
+                </div>
+            </div>
+        `;
+    $("body").append(modal);
+
+    TweenMax.from(".cpopup-modal", 0.5, {
+      opacity: 0,
+    });
+    TweenMax.from(".cpopup-modal__window", 0.5, {
+      opacity: 0,
+      y: -50,
+    });
+    $("body").css({
+      "overflow-y": "hidden",
+    });
+
+    $(".ctab-nav li").click(function () {
+      var tabIndex = $(this).index();
+      var activeTab = $(this)
+        .parent()
+        .siblings(".ctab-content")
+        .find(".ctab-pane")
+        .eq(tabIndex);
+      $(this).addClass("active").siblings().removeClass("active");
+      activeTab.addClass("show").siblings().removeClass("show");
+    });
+
+    $(".btn-close-modal").click(function () {
+      TweenMax.to(".cpopup-modal", 0.5, {
+        opacity: 0,
+      });
+      TweenMax.to(".cpopup-modal__window", 0.5, {
+        opacity: 0,
+        y: -50,
+        onComplete: function () {
+          $(".cpopup-modal").remove();
+        },
+      });
+      $("body").css({
+        "overflow-y": "auto",
+      });
+    });
+
+    var activeTab = 0;
+
+
+    $(".tab").click(function () {
+      if ($(this).index() !== 4) {
+        $(".sbr_levels").removeClass('gold');
+        $(".bar").removeClass('gold')
+      } else {
+        $(".sbr_levels").addClass('gold');
+        $(".bar").addClass('gold')
+      }
+
+      TweenMax.to(".bar", 0.2, {
+        left: `${$(this).index() * 20}%`,
+      });
+      activeTab = $(this).index();
+
+      $(".sbr_levels_tab_view").not(activeTab).css({
+        "display": "none",
+      })
+      $(`.sbr_levels_tab_view:nth-child(${activeTab+1})`).css("display", "block");
+    });
+
+    var swiper = new Swiper(".mySwiper", {
+      slidesPerView: 1,
+      spaceBetween: 30,
+      slidesPerGroup: 1,
+      loop: false,
+      loopFillGroupWithBlank: true,
+      navigation: {
+        nextEl: ".btn_next",
+        prevEl: ".btn_prev",
+      },
+      breakpoints: {
+        480: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        768: {
+          slidesPerView: 3,
+          spaceBetween: 30,
+        },
+      },
+    });
+
+  });
+
+
+});
